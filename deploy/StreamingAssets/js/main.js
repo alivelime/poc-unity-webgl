@@ -1,53 +1,43 @@
-bindFunction('JoinChat', (appIdPointer) => {
-  const appId = helperFunctions.UTF8ToString(appIdPointer)
+import { VoiceChatInit, VoiceChatJoinPublish, VoiceChatJoinSubscribe, VoiceChatPublish, VoiceChatUnpublish, VoiceChatLeave } from "./voicechat.js";
 
-  const uid = Math.floor(Math.random() * 1000);
-  const channelId = "test";
+bindFunction('VoiceChatInit', (appIdPtr, callbackPtr) => {
+  const appId = helperFunctions.UTF8ToString(appIdPtr)
+  VoiceChatInit(appId, (str) => {
+    // ヒープを確保してそれを渡す
+    const bufferSize = helperFunctions.lengthBytesUTF8(str) + 1
+    const buffer = Module._malloc(bufferSize)
+    helperFunctions.stringToUTF8(str, buffer, bufferSize)
 
-  let client = AgoraRTC.createClient({
-    mode: "rtc",
-    codec: 'vp8',
-  });
+    // メソッドを実行する
+    // viの部分はメソッドの引数や戻り値に応じて変更する
+    Module.dynCall_vi(callbackPtr, buffer)
 
-  client.on("user-joined", (remoteUser) => {
-      console.log("User: " + remoteUser.uid + " joined local channel");
+    // ヒープを解放する
+    Module._free(buffer)
   });
-  client.on("user-left", (remoteUser) => {
-    console.log(    "User: " + remoteUser.uid + " left local channel");
-  });
-  client.on("user-published", (remoteUser) => {
-    console.log(remoteUser);
-    client
-    .subscribe(remoteUser, "audio")
-    .then((remoteAudioTrack) => {
-      remoteAudioTrack.play();
-    })
-    .catch((e) => {
-      console.log("Failed to play audio!", e);
-    });
-  });
+});
 
-  // publish
-  AgoraRTC.createMicrophoneAudioTrack()
-  .then(async (track) => {
-    await client
-      .join(appId, channelId, null, uid)
-      .then((uid) => {
-        console.log(uid + " joined channel!");
-      })
-      .catch((e) => {
-        console.log("Failed to join channel!", e);
-      })
-    await client
-      .publish(track)
-      .then(() => {
-        console.log("Audio track successfully published");
-      })
-      .catch((e) => {
-        console.log("Failed to publish audio track", e);
-      });
-  })
-  .catch((e) => {
-    console.log("Failed to play audio!", e);
-  });
+bindFunction('VoiceChatJoinPublish', (roomIdPtr) => {
+  const roomId = helperFunctions.UTF8ToString(roomIdPtr)
+  VoiceChatJoinPublish(roomId);
+});
+
+bindFunction('VoiceChatJoinSubscribe', (roomIdPtr) => {
+  const roomId = helperFunctions.UTF8ToString(roomIdPtr)
+  VoiceChatJoinSubscribe(roomId);
+})
+
+bindFunction('VoiceChatPublish', (roomIdPtr) => {
+  const roomId = helperFunctions.UTF8ToString(roomIdPtr)
+  VoiceChatPublish(roomId);
+})
+
+bindFunction('VoiceChatUnpublish', (roomIdPtr) => {
+  const roomId = helperFunctions.UTF8ToString(roomIdPtr)
+  VoiceChatUnpublish(roomId);
+})
+
+bindFunction('VoiceChatLeave', (roomIdPtr) => {
+  const roomId = helperFunctions.UTF8ToString(roomIdPtr)
+  VoiceChatLeave(roomId);
 })

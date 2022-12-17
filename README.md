@@ -22,12 +22,15 @@ Assets
 ├── Plugins
 │   ├── main.jslib
 ├── Scenes
+├── Fonts
+│   ├── Noto sans font.ttf
 ├── Scripts
 │   ├── UIManager.cs
 ├── StreamingAssets
 │   ├── js
 │   │   ├── lib.js
 │   │   ├── main.js
+│   │   ├── voicechat.js
 ├── WebGLTemplates
 │   ├── Audience
 │   │   ├── index.html
@@ -85,7 +88,8 @@ public class UIManager : MonoBehaviour
 }
 ```
 
-最後に行いたい処理を `Assets/StreamingAssets/js/main.js` に記載する。
+行いたい処理を `Assets/StreamingAssets/js/voicechat.js` に記載する。
+main.jsには関数の登録を行い、ここでwasmに由来するパラメータ変換処理をまとめておく。
 bind関数にてUnityから呼び出せるようにする。
 
 ```javascript
@@ -94,6 +98,80 @@ bindFunction('JoinChat', (appIdPointer) => {
   ...
 })
 ```
+
+### callbackについて
+
+JavaScriptからC#の関数を呼び出すことができるためコールバックとして用いることができる。
+cs側で定義を行い、js側から呼び出す
+
+```csharp:Assets/Scripts/UIManager.cs
+using System;
+...
+using AOT;
+
+public class UIManager : MonoBehaviour {
+    // 定義
+    [DllImport("__Internal")]
+    private static extern void VoiceChatInit(string roomId, Action<string> callback);
+
+    // 実装
+    [MonoPInvokeCallback(typeof(Action<string>))]
+    private static void CallbackLastOne(string roomId) {
+      // 一人になった場合は自ら離脱して部屋を閉じる
+      Debug.Log("最後の一人になったので部屋から離脱します。");
+
+      // メニュー初期化
+      staticMainMenu.SetActive(true);
+      staticMainMenuMessage.text = "最後の一人になったので部屋から離脱します。";
+      staticSubMenu.SetActive(false);
+
+      // VoiceChatLeave(roomId); JS側で処理するのでここでは不要
+    }
+
+    // 初期化の際に渡す
+    void Awake() {
+      VoiceChatInit(appId, CallbackLastOne);
+      ...
+    }
+}
+```
+
+呼び出す際にパラメータ変換などを行う。
+
+```javascript:main.js
+bindFunction('VoiceChatInit', (appIdPtr, callbackPtr) => {
+  const appId = helperFunctions.UTF8ToString(appIdPtr)
+  VoiceChatInit(appId, (str) => {
+    // ヒープを確保してそれを渡す
+    const bufferSize = helperFunctions.lengthBytesUTF8(str) + 1
+    const buffer = Module._malloc(bufferSize)
+    helperFunctions.stringToUTF8(str, buffer, bufferSize)
+
+    // メソッドを実行する
+    // viの部分はメソッドの引数や戻り値に応じて変更する
+    Module.dynCall_vi(callbackPtr, buffer)
+
+    // ヒープを解放する
+    Module._free(buffer)
+  });
+});
+```
+
+使いたい場所では特に意識することなく呼び出す
+
+```javascript:voicechat.js
+    // 自分しか残っていない場合は部屋を閉じる
+    if (rooms[roomId].members.size == 1) {
+      try {
+        callbackLastOne(roomId)
+      } catch (e) {
+        console.log(e);
+      }
+      leave(roomId);
+    }
+```
+
+### モジュール分けについて
 
 処理が長くなる場合は別モジュールに切り分ける。
 新たに各処理はES Moduleとするのが良さそうなものの、UnityやAgoro SDKなどのCDNにて読み込む場合は適さないことがある。

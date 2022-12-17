@@ -1,8 +1,12 @@
 const plugin = {}
 const methodNames = [
-    "JoinChat",
+    "VoiceChatInit",
+    "VoiceChatJoinPublish",
+    "VoiceChatJoinSubscribe",
+    "VoiceChatPublish",
+    "VoiceChatUnpublish",
+    "VoiceChatLeave",
 ]
-
 
 const helperFunctionNames = [
     'lengthBytesUTF8',
