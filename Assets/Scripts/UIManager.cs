@@ -11,13 +11,16 @@ public class UIManager : MonoBehaviour
 {
     public string appId;
     public string roomId = "test1";
+    public string screenRoomId = "screenshare";
 
     // property
+    public GameObject entranceMenu;
     public GameObject mainMenu;
-    public Text mainMenuMessage;
     public GameObject subMenu;
+    public Text mainMenuMessage;
     public GameObject publishButton;
     public GameObject unpublishButton;
+    public VideoScreen videoScreen;
     
     // static callbackから呼び出したいのでstatic変数にコピーする
     private static GameObject staticMainMenu;
@@ -38,16 +41,28 @@ public class UIManager : MonoBehaviour
     private static extern void VoiceChatLeave(string roomId);
 
     void Awake() {
+      // メニュー初期化
+      entranceMenu.SetActive(true);
+      mainMenu.SetActive(false);
+      subMenu.SetActive(false);
+    }
+
+    // 一番最初の入室ボタンがクリックされた後の入室処理。ブラウザのセキュリティがクリックなどのユーザアクションを必要とするものが多いためここで接続する
+    public void EnterRoom() {
       // プロパティをstatic変数にコピーしておく
       VoiceChatInit(appId, CallbackLastOne);
+      videoScreen.Subscribe(appId);
+
       staticMainMenu = mainMenu;
       staticMainMenuMessage = mainMenuMessage;
       staticSubMenu = subMenu;
 
       // メニュー初期化
+      entranceMenu.SetActive(false);
       mainMenu.SetActive(true);
       subMenu.SetActive(false);
     }
+    
 
     public void StartVoiceChat() {
 

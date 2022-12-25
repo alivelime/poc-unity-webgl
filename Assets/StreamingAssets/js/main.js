@@ -1,4 +1,5 @@
 import { VoiceChatInit, VoiceChatJoinPublish, VoiceChatJoinSubscribe, VoiceChatPublish, VoiceChatUnpublish, VoiceChatLeave } from "./voicechat.js";
+import { VideoScreenInit } from "./screenshare.js";
 
 bindFunction('VoiceChatInit', (appIdPtr, callbackPtr) => {
   const appId = helperFunctions.UTF8ToString(appIdPtr)
@@ -41,3 +42,13 @@ bindFunction('VoiceChatLeave', (roomIdPtr) => {
   const roomId = helperFunctions.UTF8ToString(roomIdPtr)
   VoiceChatLeave(roomId);
 })
+
+bindFunction('VideoScreenInit', (appIdPtr, onPublishedPtr, onStoppedPtr) => {
+  const appId = helperFunctions.UTF8ToString(appIdPtr)
+  VideoScreenInit(appId, () => {
+    Module.dynCall_v(onPublishedPtr)
+  }, () => {
+    Module.dynCall_v(onStoppedPtr)
+  });
+});
+
