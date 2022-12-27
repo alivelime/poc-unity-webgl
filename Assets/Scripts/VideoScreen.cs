@@ -22,11 +22,31 @@ public class VideoScreen : MonoBehaviour
     private static extern void UpdateScreenTexture(int texture);
 
     [DllImport("__Internal")]
-    private static extern void VideoScreenInit(string screenRoomId, Action onPublished, Action onStopped);
+    private static extern void VideoScreenInit(string appId, string roomId, Action onPublished, Action onStopped);
+    [DllImport("__Internal")]
+    private static extern void VideoScreenStart();
+    [DllImport("__Internal")]
+    private static extern void VideoScreenStop();
+    [DllImport("__Internal")]
+    private static extern void VideoScreenTest(Action onPublished, Action onStopped);
 
     public void Subscribe(string appId)
     {
-      VideoScreenInit(appId, onPublished, onStopped);
+      VideoScreenInit(appId, screenRoomId, onPublished, onStopped);
+    }
+
+    public void Publish()
+    {
+      VideoScreenStart();
+    }
+    public void Unpublish()
+    {
+      VideoScreenStop();
+    }
+
+    public void VideoTest()
+    {
+      VideoScreenTest(onPublished, onStopped);
       playing = true;
     }
 

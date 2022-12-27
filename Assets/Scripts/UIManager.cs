@@ -28,7 +28,7 @@ public class UIManager : MonoBehaviour
     private static GameObject staticSubMenu;
 
     [DllImport("__Internal")]
-    private static extern void VoiceChatInit(string roomId, Action<string> callback);
+    private static extern void VoiceChatInit(string appId, Action<string> callback);
     [DllImport("__Internal")]
     private static extern void VoiceChatJoinPublish(string roomId);
     [DllImport("__Internal")]

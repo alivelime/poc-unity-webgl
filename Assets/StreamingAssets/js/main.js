@@ -1,5 +1,5 @@
 import { VoiceChatInit, VoiceChatJoinPublish, VoiceChatJoinSubscribe, VoiceChatPublish, VoiceChatUnpublish, VoiceChatLeave } from "./voicechat.js";
-import { VideoScreenInit } from "./screenshare.js";
+import { VideoScreenInit, VideoScreenStart, VideoScreenStop, VideoScreenTest } from "./screenshare.js";
 
 bindFunction('VoiceChatInit', (appIdPtr, callbackPtr) => {
   const appId = helperFunctions.UTF8ToString(appIdPtr)
@@ -43,12 +43,28 @@ bindFunction('VoiceChatLeave', (roomIdPtr) => {
   VoiceChatLeave(roomId);
 })
 
-bindFunction('VideoScreenInit', (appIdPtr, onPublishedPtr, onStoppedPtr) => {
+bindFunction('VideoScreenInit', (appIdPtr, channelIdPtr, onPublishedPtr, onStoppedPtr) => {
   const appId = helperFunctions.UTF8ToString(appIdPtr)
-  VideoScreenInit(appId, () => {
+  const channelId = helperFunctions.UTF8ToString(channelIdPtr)
+  VideoScreenInit(appId, channelId, () => {
     Module.dynCall_v(onPublishedPtr)
   }, () => {
     Module.dynCall_v(onStoppedPtr)
   });
 });
 
+bindFunction('VideoScreenStart', () => {
+  VideoScreenStart();
+});
+
+bindFunction('VideoScreenStop', () => {
+  VideoScreenStop();
+});
+
+bindFunction('VideoScreenTest', (onPublishedPtr, onStoppedPtr) => {
+  VideoScreenTest(() => {
+    Module.dynCall_v(onPublishedPtr)
+  }, () => {
+    Module.dynCall_v(onStoppedPtr)
+  });
+});
