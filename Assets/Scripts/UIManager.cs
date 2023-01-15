@@ -20,8 +20,9 @@ public class UIManager : MonoBehaviour
 
     public Text mainMenuMessage;
 
-    public MainScreen mainScreen;
-    public SubScreen subScreen;
+    public GameObject mainScreen;
+    public GameObject subScreen;
+    public GameObject videoPlayer;
     
     // for voice chat button.
     public GameObject voiceChatMicButtonOn;
@@ -56,8 +57,8 @@ public class UIManager : MonoBehaviour
     public void EnterRoom() {
       // プロパティをstatic変数にコピーしておく
       VoiceChatInit(appId, CallbackLastOne);
-      mainScreen.Subscribe(appId);
-      subScreen.Subscribe();
+      mainScreen.GetComponent<MainScreen>().Subscribe(appId);
+      subScreen.GetComponent<SubScreen>().Subscribe();
 
       staticMainMenu = mainMenu;
       staticMainMenuMessage = mainMenuMessage;
@@ -152,5 +153,18 @@ public class UIManager : MonoBehaviour
       staticSubMenu.SetActive(false);
 
       // VoiceChatLeave(roomId); JS側で処理するのでここでは不要
+    }
+
+    // 途中再生のテスト
+    public void VideoTest()
+    {
+      subScreen.SetActive(false);
+      mainScreen.GetComponent<MainScreen>().VideoTest();
+
+      /* VideoPlayerを使う例では PreparedComplete イベントでは長いファイルを完全に読み込まないためにシークできない
+      mainScreen.SetActive(false);
+      videoPlayer.SetActive(true);
+      videoPlayer.GetComponent<HalfwayVideoPlayer>().WantPlay();
+      */
     }
 }

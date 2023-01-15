@@ -24,7 +24,7 @@ public class MainScreen : MonoBehaviour
     [DllImport("__Internal")]
     private static extern void LiveMainScreenInit(string appId, string roomId, Action onPublished, Action onStopped);
     [DllImport("__Internal")]
-    private static extern void VideoScreenTest(Action onPublished, Action onStopped);
+    private static extern void VideoScreenTest(string file, int time, Action onPublished, Action onStopped);
 
     public void Subscribe(string appId)
     {
@@ -33,7 +33,8 @@ public class MainScreen : MonoBehaviour
 
     public void VideoTest()
     {
-      VideoScreenTest(onPublished, onStopped);
+      // 0M8A2592_10.mp4 の 18:52 から再生を開始する。
+      VideoScreenTest("0M8A2592_10.mp4", 18 * 60 + 52, onPublished, onStopped);
     }
 
     void Start()

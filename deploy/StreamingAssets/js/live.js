@@ -244,19 +244,74 @@ export const LiveMicStop = () => {
   localTracks.micTrack = null;
 }
 
-export const VideoScreenTest = async (id, _onPublished, _onStopped) => {
+export const VideoScreenTest = async (file, time, _onPublished, _onStopped) => {
   const elem = document.getElementById("video_screen");
   elem.setAttribute("style", "display:none;");
   elem.setAttribute("playsinline", "");
-  elem.setAttribute("src", "/StreamingAssets/bbb.mp4");
+  elem.setAttribute("preload", "auto"); // これを設定しないとブラウザは先頭の一部のデータしか読み込みません。
+  elem.setAttribute("src", `/StreamingAssets/${file}`);
   if (!window.navigator.userAgent.toLowerCase().indexOf("safari")) {
     elem.muted = true;
   } else {
     elem.muted = false;
   }
-  elem.play();
+
+  // スマホ回線などでは全部ロードしないので、裏側でこっそり再生させつつバッファがたまったらシークする
+  elem.addEventListener('canplay', () => {
+    // for debug
+    elem.setAttribute("style", "display:block;");
+    // elem.muted = false;
+    
+    elem.muted = true;
+    elem.play();
+  });
+  elem.addEventListener('canplaythrough', () => {
+    // PCのみでよければ preload = auto でこのイベントを待てば良い
+    /*
+    console.log("video test loadeddata. " + elem.readyState);
+    elem.currentTime = time;
+    elem.play();
+
+    _onPublished();
+    */
+  })
+  // データが読み込まれるたびにシークできるかチェックする。できなければ一番後ろにシークする。
+  // elem.addEventListener('progress', (event) => {
+  //   // firefox だと発動が遅い
+  // });
+  const timer = setInterval(() => {
+    const timerange = elem.seekable;
+    let start;
+    let end;
+    for (let count = 0; count < timerange.length; count++) {
+      start = timerange.start(count);
+      end = timerange.end(count);
+      console.log(`progress ${count}: ${start} - ${end}`);
+      if (start <= time && time <= end) {
+        clearInterval(timer);
+
+        // Unityの方に表示する
+        elem.currentTime = time;
+        const unmute = () => {
+          elem.muted = false;
+        }
+        document.body.addEventListener("click", unmute);
+        alert("再生準備ができました。再生ボタンをクリックしてください");
+
+        _onPublished();
+        return;
+      }
+    }
+    // シーク可能でなければ最後まで飛ばす
+    end = parseInt(end, 10) - 10;
+    if (end > 0) {
+      elem.currentTime = end;
+    }
+  }, 1000);
 
   elem.addEventListener('ended', (event) => {
     _onStopped();
   });
+
+  elem.load();
 };

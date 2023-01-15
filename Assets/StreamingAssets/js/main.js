@@ -108,8 +108,12 @@ bindFunction('LiveMicStop', () => {
   LiveMicStop();
 });
 
-bindFunction('VideoScreenTest', (onPublishedPtr, onStoppedPtr) => {
-  VideoScreenTest(() => {
+bindFunction('VideoScreenTest', (filePtr, time, onPublishedPtr, onStoppedPtr) => {
+  const file = helperFunctions.UTF8ToString(filePtr)
+  VideoScreenTest(
+    file,
+    time,
+    () => {
     Module.dynCall_v(onPublishedPtr)
   }, () => {
     Module.dynCall_v(onStoppedPtr)
