@@ -7,9 +7,9 @@ using AOT;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class VideoScreen : MonoBehaviour
+public class SubScreen : MonoBehaviour
 {
-    public string screenRoomId = "screenshare";
+    public string screenRoomId = "live";
 
     [SerializeField]
     public Renderer obj3d;
@@ -19,36 +19,16 @@ public class VideoScreen : MonoBehaviour
     private static bool playing;
 
     [DllImport("__Internal")]
-    private static extern void UpdateScreenTexture(int texture);
+    private static extern void UpdateSubScreenTexture(int texture);
 
     [DllImport("__Internal")]
-    private static extern void VideoScreenInit(string appId, string roomId, Action onPublished, Action onStopped);
-    [DllImport("__Internal")]
-    private static extern void VideoScreenStart();
-    [DllImport("__Internal")]
-    private static extern void VideoScreenStop();
-    [DllImport("__Internal")]
-    private static extern void VideoScreenTest(Action onPublished, Action onStopped);
+    private static extern void LiveSubScreenInit(Action onPublished, Action onStopped);
 
-    public void Subscribe(string appId)
+    public void Subscribe()
     {
-      VideoScreenInit(appId, screenRoomId, onPublished, onStopped);
+      LiveSubScreenInit(onPublished, onStopped);
     }
 
-    public void Publish()
-    {
-      VideoScreenStart();
-    }
-    public void Unpublish()
-    {
-      VideoScreenStop();
-    }
-
-    public void VideoTest()
-    {
-      VideoScreenTest(onPublished, onStopped);
-      playing = true;
-    }
 
     void Start()
     {
@@ -62,7 +42,7 @@ public class VideoScreen : MonoBehaviour
           Destroy(_texture);
         }
         _texture = new Texture2D(1, 1, TextureFormat.ARGB32, false); // jslib側で再生成されるので空で良い
-        UpdateScreenTexture((int)_texture.GetNativeTexturePtr());
+        UpdateSubScreenTexture((int)_texture.GetNativeTexturePtr());
         obj3d.material.mainTexture = _texture;
       }
       else
@@ -81,3 +61,4 @@ public class VideoScreen : MonoBehaviour
       playing = false;
     }
 }
+

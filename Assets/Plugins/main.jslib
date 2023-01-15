@@ -7,9 +7,17 @@ const methodNames = [
     "VoiceChatUnpublish",
     "VoiceChatLeave",
 
-    "VideoScreenInit",
-    "VideoScreenStart",
-    "VideoScreenStop",
+    "LiveMainScreenInit",
+    "LiveSubScreenInit",
+    "LiveHostJoin",
+    "LiveHostLeave",
+    "LiveScreenshareStart",
+    "LiveScreenshareStop",
+    "LiveCameraStart",
+    "LiveCameraStop",
+    "LiveMicStart",
+    "LiveMicStop",
+
     "VideoScreenTest",
 ]
 
@@ -26,17 +34,36 @@ for (var i = 0; i < methodNames.length; i++) {
   plugin[methodName+'__postset'] = `_${methodName} = __unity_getBinding(Module, ${helperFunctions}, '${methodName}')`
 }
 
-plugin.UpdateScreenTexture = function (tex) {
+// for main video screen.
+plugin.UpdateMainScreenTexture = function (tex) {
   // set texture
   GLctx.deleteTexture(GL.textures[tex]);
   var t = GLctx.createTexture();
   t.name = tex;
   GL.textures[tex] = t;
 
-  var elem = document.querySelector("#agora_video_screen video");
+  var elem = document.querySelector("#agora_main_screen video");
   if (!elem) {
     elem = document.getElementById("video_screen");
   }
+
+  // target, texture
+  GLctx.bindTexture(GLctx.TEXTURE_2D, GL.textures[tex]);
+  GLctx.pixelStorei(GLctx.UNPACK_FLIP_Y_WEBGL, true); // flip up down.
+  GLctx.texParameteri(GLctx.TEXTURE_2D, GLctx.TEXTURE_WRAP_S, GLctx.CLAMP_TO_EDGE);
+  GLctx.texParameteri(GLctx.TEXTURE_2D, GLctx.TEXTURE_WRAP_T, GLctx.CLAMP_TO_EDGE);
+  GLctx.texParameteri(GLctx.TEXTURE_2D, GLctx.TEXTURE_MIN_FILTER, GLctx.LINEAR);
+  GLctx.texImage2D(GLctx.TEXTURE_2D, 0, GLctx.RGBA, GLctx.RGBA, GLctx.UNSIGNED_BYTE, elem);
+}
+// for camera screen.
+plugin.UpdateSubScreenTexture = function (tex) {
+  // set texture
+  GLctx.deleteTexture(GL.textures[tex]);
+  var t = GLctx.createTexture();
+  t.name = tex;
+  GL.textures[tex] = t;
+
+  var elem = document.querySelector("#agora_sub_screen video");
 
   // target, texture
   GLctx.bindTexture(GLctx.TEXTURE_2D, GL.textures[tex]);

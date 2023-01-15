@@ -1,5 +1,18 @@
 import { VoiceChatInit, VoiceChatJoinPublish, VoiceChatJoinSubscribe, VoiceChatPublish, VoiceChatUnpublish, VoiceChatLeave } from "./voicechat.js";
-import { VideoScreenInit, VideoScreenStart, VideoScreenStop, VideoScreenTest } from "./screenshare.js";
+import { 
+  LiveHostJoin,
+  LiveHostLeave,
+
+  LiveMainScreenInit,
+  LiveSubScreenInit,
+  LiveScreenshareStart,
+  LiveScreenshareStop,
+  LiveCameraStart,
+  LiveCameraStop,
+  LiveMicStart,
+  LiveMicStop,
+  VideoScreenTest,
+} from "./live.js";
 
 bindFunction('VoiceChatInit', (appIdPtr, callbackPtr) => {
   const appId = helperFunctions.UTF8ToString(appIdPtr)
@@ -43,22 +56,56 @@ bindFunction('VoiceChatLeave', (roomIdPtr) => {
   VoiceChatLeave(roomId);
 })
 
-bindFunction('VideoScreenInit', (appIdPtr, channelIdPtr, onPublishedPtr, onStoppedPtr) => {
+bindFunction('LiveMainScreenInit', (appIdPtr, channelIdPtr, onPublishedPtr, onStoppedPtr) => {
   const appId = helperFunctions.UTF8ToString(appIdPtr)
   const channelId = helperFunctions.UTF8ToString(channelIdPtr)
-  VideoScreenInit(appId, channelId, () => {
+  LiveMainScreenInit(appId, channelId, () => {
     Module.dynCall_v(onPublishedPtr)
   }, () => {
     Module.dynCall_v(onStoppedPtr)
   });
 });
 
-bindFunction('VideoScreenStart', () => {
-  VideoScreenStart();
+bindFunction('LiveSubScreenInit', (onPublishedPtr, onStoppedPtr) => {
+  LiveSubScreenInit(() => {
+    Module.dynCall_v(onPublishedPtr)
+  }, () => {
+    Module.dynCall_v(onStoppedPtr)
+  });
 });
 
-bindFunction('VideoScreenStop', () => {
-  VideoScreenStop();
+bindFunction('LiveHostJoin', () => {
+  LiveHostJoin();
+});
+
+bindFunction('LiveHostLeave', () => {
+  LiveHostLeave();
+});
+
+bindFunction('LiveScreenshareStart', (onStoppedPtr) => {
+  LiveScreenshareStart(() => {
+    Module.dynCall_v(onStoppedPtr);
+  });
+});
+
+bindFunction('LiveScreenshareStop', () => {
+  LiveScreenshareStop();
+});
+
+bindFunction('LiveCameraStart', () => {
+  LiveCameraStart();
+});
+
+bindFunction('LiveCameraStop', () => {
+  LiveCameraStop();
+});
+
+bindFunction('LiveMicStart', () => {
+  LiveMicStart();
+});
+
+bindFunction('LiveMicStop', () => {
+  LiveMicStop();
 });
 
 bindFunction('VideoScreenTest', (onPublishedPtr, onStoppedPtr) => {

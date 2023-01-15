@@ -11,17 +11,22 @@ public class UIManager : MonoBehaviour
 {
     public string appId;
     public string roomId = "test1";
-    public string screenRoomId = "screenshare";
 
     // property
     public GameObject entranceMenu;
     public GameObject mainMenu;
     public GameObject subMenu;
+    public GameObject liveMenu;
+
     public Text mainMenuMessage;
-    public GameObject publishButton;
-    public GameObject unpublishButton;
-    public VideoScreen videoScreen;
+
+    public MainScreen mainScreen;
+    public SubScreen subScreen;
     
+    // for voice chat button.
+    public GameObject voiceChatMicButtonOn;
+    public GameObject voiceChatMicButtonOff;
+
     // static callbackから呼び出したいのでstatic変数にコピーする
     private static GameObject staticMainMenu;
     private static Text staticMainMenuMessage;
@@ -51,7 +56,8 @@ public class UIManager : MonoBehaviour
     public void EnterRoom() {
       // プロパティをstatic変数にコピーしておく
       VoiceChatInit(appId, CallbackLastOne);
-      videoScreen.Subscribe(appId);
+      mainScreen.Subscribe(appId);
+      subScreen.Subscribe();
 
       staticMainMenu = mainMenu;
       staticMainMenuMessage = mainMenuMessage;
@@ -61,6 +67,19 @@ public class UIManager : MonoBehaviour
       entranceMenu.SetActive(false);
       mainMenu.SetActive(true);
       subMenu.SetActive(false);
+      liveMenu.SetActive(false);
+    }
+
+    // 上記の EnterRoom() の処理に加えてライブ配信用のUIに切り替える
+    public void LiveStart() {
+      // プロパティをstatic変数にコピーしておく
+      EnterRoom();
+
+      // メニュー初期化
+      entranceMenu.SetActive(false);
+      mainMenu.SetActive(false);
+      subMenu.SetActive(false);
+      liveMenu.SetActive(true);
     }
     
 
@@ -85,8 +104,8 @@ public class UIManager : MonoBehaviour
       // UI 切り替え
       mainMenu.SetActive(false);
       subMenu.SetActive(true);
-      publishButton.SetActive(false);
-      unpublishButton.SetActive(true);
+      voiceChatMicButtonOn.SetActive(false);
+      voiceChatMicButtonOff.SetActive(true);
     }
     public void EnterChatCircle() {
       VoiceChatJoinSubscribe(roomId);
@@ -94,8 +113,8 @@ public class UIManager : MonoBehaviour
       // UI 切り替え
       mainMenu.SetActive(false);
       subMenu.SetActive(true);
-      publishButton.SetActive(true);
-      unpublishButton.SetActive(false);
+      voiceChatMicButtonOn.SetActive(true);
+      voiceChatMicButtonOff.SetActive(false);
     }
     public void LeaveChatCircle() {
        VoiceChatLeave(roomId);
@@ -105,21 +124,21 @@ public class UIManager : MonoBehaviour
       mainMenu.SetActive(true);
       subMenu.SetActive(false);
     }
-    public void Publish() {
+    public void VoiceChatMicOn() {
       // TODO 既にSubscribeしている前提とします。
       VoiceChatPublish(roomId);
 
       // UI 切り替え
-      publishButton.SetActive(false);
-      unpublishButton.SetActive(true);
+      voiceChatMicButtonOn.SetActive(false);
+      voiceChatMicButtonOff.SetActive(true);
     }
-    public void Unpublish() {
+    public void VoiceChatMicOff() {
       // TODO 既にpublishしている前提とします。
       VoiceChatUnpublish(roomId);
 
       // UI 切り替え
-      publishButton.SetActive(true);
-      unpublishButton.SetActive(false);
+      voiceChatMicButtonOn.SetActive(true);
+      voiceChatMicButtonOff.SetActive(false);
     }
 
     [MonoPInvokeCallback(typeof(Action<string>))]
