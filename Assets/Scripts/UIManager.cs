@@ -156,15 +156,21 @@ public class UIManager : MonoBehaviour
     }
 
     // 途中再生のテスト
-    public void VideoTest()
+    public void VideoTestJS()
     {
+      // 邪魔な表示を消す
+      entranceMenu.SetActive(false);
       subScreen.SetActive(false);
+      
       mainScreen.GetComponent<MainScreen>().VideoTest();
-
-      /* VideoPlayerを使う例では PreparedComplete イベントでは長いファイルを完全に読み込まないためにシークできない
+    }
+    public void VideoTestVP()
+    {
+      // 邪魔な表示を消す
+      entranceMenu.SetActive(false);
       mainScreen.SetActive(false);
       videoPlayer.SetActive(true);
+
       videoPlayer.GetComponent<HalfwayVideoPlayer>().WantPlay();
-      */
     }
 }

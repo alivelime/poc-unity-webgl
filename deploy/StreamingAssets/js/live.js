@@ -249,36 +249,16 @@ export const VideoScreenTest = async (file, time, _onPublished, _onStopped) => {
   elem.setAttribute("style", "display:none;");
   elem.setAttribute("playsinline", "");
   elem.setAttribute("preload", "auto"); // これを設定しないとブラウザは先頭の一部のデータしか読み込みません。
-  elem.setAttribute("src", `/StreamingAssets/${file}`);
-  if (!window.navigator.userAgent.toLowerCase().indexOf("safari")) {
-    elem.muted = true;
-  } else {
-    elem.muted = false;
-  }
+  elem.setAttribute("src", `StreamingAssets/${file}`);
+  elem.muted = true;
 
   // スマホ回線などでは全部ロードしないので、裏側でこっそり再生させつつバッファがたまったらシークする
   elem.addEventListener('canplay', () => {
     // for debug
-    elem.setAttribute("style", "display:block;");
+    // elem.setAttribute("style", "display:block;");
     // elem.muted = false;
-    
-    elem.muted = true;
     elem.play();
   });
-  elem.addEventListener('canplaythrough', () => {
-    // PCのみでよければ preload = auto でこのイベントを待てば良い
-    /*
-    console.log("video test loadeddata. " + elem.readyState);
-    elem.currentTime = time;
-    elem.play();
-
-    _onPublished();
-    */
-  })
-  // データが読み込まれるたびにシークできるかチェックする。できなければ一番後ろにシークする。
-  // elem.addEventListener('progress', (event) => {
-  //   // firefox だと発動が遅い
-  // });
   const timer = setInterval(() => {
     const timerange = elem.seekable;
     let start;
@@ -292,11 +272,15 @@ export const VideoScreenTest = async (file, time, _onPublished, _onStopped) => {
 
         // Unityの方に表示する
         elem.currentTime = time;
-        const unmute = () => {
+        if (isSafari()) {
+          const unmute = () => {
+            elem.muted = false;
+          }
+          document.getElementById("unity-canvas").addEventListener("touchstart", unmute);
+          alert("画面をタップすると音声がでます。");
+        } else {
           elem.muted = false;
         }
-        document.body.addEventListener("click", unmute);
-        alert("再生準備ができました。再生ボタンをクリックしてください");
 
         _onPublished();
         return;
@@ -315,3 +299,8 @@ export const VideoScreenTest = async (file, time, _onPublished, _onStopped) => {
 
   elem.load();
 };
+function isSafari() {
+  return (
+    window.navigator.userAgent.toLowerCase().indexOf("chrome") == -1 &&
+    window.navigator.userAgent.toLowerCase().indexOf("safari") != -1);
+}
