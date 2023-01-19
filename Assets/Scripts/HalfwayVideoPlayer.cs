@@ -25,6 +25,7 @@ public class HalfwayVideoPlayer : MonoBehaviour
         _videoPlayer.prepareCompleted += PrepareCompleted;
         isPrepared = false;
         playing = false;
+        // _videoPlayer.SetDirectAudioMute(0, true);
         _videoPlayer.Prepare();
     }
     public void WantPlay() {
@@ -41,8 +42,9 @@ public class HalfwayVideoPlayer : MonoBehaviour
       // *** 生成されるビデオタグが動画データを完全に読み込まないため、長いファイルでは動作しません。 ***
       // *** 代わりに MainScreen.VideoTest() にてJavaScriptにて制御する方法を参照ください
       //
-        _videoPlayer.time = (8 * 60 + 52);
+        _videoPlayer.time = (18 * 60 + 52);
         _videoPlayer.Play();
+        // _videoPlayer.SetDirectAudioMute(0, false);
     }
 
     // 読込完了時のコールバック.
